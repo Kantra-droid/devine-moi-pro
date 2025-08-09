@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Devine-Moi Pro - Jeu de devinettes</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Devine-Moi Pro">
+    <meta name="description" content="Jeu de devinettes multijoueur avec timer et scores">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/public/manifest.json">
+    
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="/public/icons/icon-192.png">
+    
+    <!-- React and Dependencies -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- App Styles -->
+    <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- Load modules in correct order -->
+    <script type="text/babel" src="/src/data/wordDatabase.js"></script>
+    <script type="text/babel" src="/src/modules/core/gameState.js"></script>
+    <script type="text/babel" src="/src/modules/game/gameLogic.js"></script>
+    <script type="text/babel" src="/src/modules/game/timer.js"></script>
+    <script type="text/babel" src="/src/modules/ui/components/SetupScreen.js"></script>
+    <script type="text/babel" src="/src/modules/ui/components/GameScreen.js"></script>
+    <script type="text/babel" src="/src/modules/ui/components/ScoresScreen.js"></script>
+    <script type="text/babel" src="/src/modules/ui/components/AppStatus.js"></script>
+    <script type="text/babel" src="/src/modules/ui/components/InstallBanner.js"></script>
+    <script type="text/babel" src="/src/modules/pwa/pwaManager.js"></script>
+    <script type="text/babel" src="/src/app.js"></script>
+</body>
+</html>
