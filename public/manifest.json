@@ -1,0 +1,57 @@
+{
+  "name": "Devine-Moi Pro",
+  "short_name": "DevineMoi",
+  "description": "Jeu de devinettes multijoueur avec timer et scores",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/public/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/public/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/public/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/public/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "screenshots": [
+    {
+      "src": "/public/screenshots/game.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle Partie",
+      "short_name": "Jouer",
+      "description": "Commencer une nouvelle partie",
+      "url": "/?new=true",
+      "icons": [{
+        "src": "/public/icons/play.png",
+        "sizes": "96x96"
+      }]
+    }
+  ]
+}
