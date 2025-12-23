@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <title>Devine-Moi Pro</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto',sans-serif;min-height:100vh;color:white;overflow-x:hidden;transition:background .5s}
+        body.setup-screen{background:linear-gradient(135deg,#667eea,#764ba2)}
+        body.playing-screen{background:linear-gradient(135deg,#1e3c72,#2a5298)}
+        body.scores-screen{background:linear-gradient(135deg,#f093fb,#f5576c)}
+        .container{max-width:420px;margin:0 auto;padding:20px;min-height:100vh}
+        .screen{display:none;animation:slideIn .3s}
+        .screen.active{display:block}
+        @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        @keyframes crownBounce{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-5px) rotate(5deg)}}
+        .header{text-align:center;margin-bottom:25px}
+        .logo{font-size:3.5rem;margin-bottom:8px}
+        .title{font-size:2.2rem;font-weight:bold;background:linear-gradient(45deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+        .subtitle{opacity:.9;font-size:.95rem}
+        .version{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:.75rem;display:inline-block;margin-top:8px}
+        .card{background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:18px;margin-bottom:18px}
+        .card h3{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-weight:600;font-size:1rem}
+        .input-group{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+        .input-group input{flex:1;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:12px 14px;color:white;font-weight:500;font-size:1rem}
+        .input-group input::placeholder{color:rgba(255,255,255,.6)}
+        .btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:12px 16px;color:white;cursor:pointer;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;font-size:1rem}
+        .btn:hover,.btn:active{background:rgba(255,255,255,.3);transform:scale(1.02)}
+        .btn-primary{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#4a148c;font-size:1.1rem;padding:16px 24px;width:100%;margin-top:10px}
+        .btn-remove{background:rgba(220,20,60,.4);padding:12px;width:44px;height:44px;flex-shrink:0}
+        .btn-add{border:2px dashed rgba(255,255,255,.4);padding:14px;width:100%;background:transparent}
+        .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:280px;overflow-y:auto}
+        .mode-item{text-align:center;padding:12px 8px;border-radius:12px;font-size:.85rem;cursor:pointer;transition:all .2s}
+        .mode-item.selected{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#4a148c;transform:scale(1.02)}
+        .mode-item .emoji{font-size:1.5rem;display:block;margin-bottom:4px}
+        .timer-settings{display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .timer-value{font-size:1.8rem;font-weight:bold;min-width:80px;text-align:center}
+        .timer-btn{width:44px;height:44px;border-radius:50%;font-size:1.3rem}
+        .words-per-round{display:flex;gap:8px;justify-content:center}
+        .words-per-round .btn{flex:1;padding:12px}
+        .words-per-round .btn.selected{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#4a148c}
+        .game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px}
+        .round-badge{background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;font-weight:600;font-size:.9rem}
+        .mode-badge{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#4a148c;padding:6px 14px;border-radius:20px;font-weight:600;font-size:.85rem}
+        .progress-badge{background:rgba(76,175,80,.6);padding:6px 14px;border-radius:20px;font-weight:600;font-size:.9rem}
+        .timer-display{text-align:center;margin-bottom:20px}
+        .timer-circle{width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:2.2rem;font-weight:bold;border:4px solid rgba(255,255,255,.3);transition:all .3s}
+        .timer-circle.critical{border-color:#ff4444;animation:pulse .5s infinite;color:#ff4444}
+        .timer-circle.infinite{font-size:2.5rem}
+        .timer-controls{display:flex;justify-content:center;gap:10px}
+        .timer-controls .btn{width:50px;height:50px;border-radius:50%;font-size:1.2rem}
+        .word-card{background:rgba(255,255,255,.2);border-radius:24px;padding:25px;text-align:center;margin-bottom:20px}
+        .current-word{font-size:2.2rem;font-weight:bold;margin-bottom:20px;letter-spacing:2px;word-break:break-word}
+        .hints-container{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+        .hint-badge{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#4a148c;padding:8px 14px;border-radius:20px;font-weight:600;font-size:.9rem}
+        .forbidden-label{color:#ff6b6b;font-size:.85rem;margin-bottom:10px;font-weight:600}
+        .forbidden-badge{background:rgba(220,20,60,.5);color:white;padding:8px 14px;border-radius:20px;font-weight:600;font-size:.9rem}
+        .players-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+        .player-btn{padding:14px 10px;text-align:center;border-radius:12px;font-weight:600;font-size:.9rem}
+        .player-btn .score{font-size:1.3rem;display:block;margin-top:4px}
+        .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .action-buttons .btn{padding:14px}
+        .btn-skip{background:rgba(255,152,0,.5)}
+        .btn-next{background:rgba(76,175,80,.5)}
+        .btn-scores{grid-column:span 2;background:rgba(156,39,176,.5)}
+        .scores-header{text-align:center;margin-bottom:25px}
+        .scores-header h2{font-size:2rem;margin-bottom:8px}
+        .podium{margin-bottom:20px}
+        .podium-item{display:flex;align-items:center;gap:15px;padding:15px;background:rgba(255,255,255,.15);border-radius:16px;margin-bottom:10px}
+        .podium-item.first{background:linear-gradient(45deg,rgba(255,215,0,.4),rgba(255,140,0,.4));border:2px solid rgba(255,215,0,.6)}
+        .podium-rank{font-size:2rem;width:50px;text-align:center}
+        .podium-info{flex:1}
+        .podium-name{font-weight:600;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+        .crown{animation:crownBounce 1s infinite;display:inline-block}
+        .podium-score{font-size:1.8rem;font-weight:bold}
+        .stats-card{background:rgba(255,255,255,.15);border-radius:16px;padding:15px;margin-bottom:20px}
+        .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;text-align:center}
+        .stat-item .value{font-size:1.8rem;font-weight:bold}
+        .stat-item .label{font-size:.85rem;opacity:.8}
+        .scores-actions{display:flex;flex-direction:column;gap:10px}
+        .btn-continue{background:linear-gradient(45deg,#4CAF50,#8BC34A);color:white}
+        .btn-new-game{background:rgba(255,255,255,.2)}
+        .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:15px}
+        .spinner{width:50px;height:50px;border:4px solid rgba(255,255,255,.3);border-top-color:#ffd700;border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .offline-banner{position:fixed;top:0;left:0;right:0;background:#ff5722;color:white;text-align:center;padding:8px;font-size:.85rem;z-index:1000;display:none}
+        .offline-banner.show{display:block}
+    </style>
+</head>
+<body class="setup-screen">
+    <div class="offline-banner" id="offlineBanner">📴 Mode hors-ligne</div>
+    <div class="container">
+        <div class="screen active" id="setupScreen">
+            <div class="header">
+                <div class="logo">🎯</div>
+                <h1 class="title">Devine-Moi Pro</h1>
+                <p class="subtitle">Fais deviner sans prononcer les mots interdits !</p>
+                <span class="version">v2.0 - Supabase</span>
+            </div>
+            <div class="card"><h3>👥 Joueurs</h3><div id="playersContainer"></div><button class="btn btn-add" onclick="addPlayer()">➕ Ajouter</button></div>
+            <div class="card"><h3>🎮 Mode</h3><div class="mode-grid" id="modeGrid"></div></div>
+            <div class="card"><h3>🎯 Mots/round</h3><div class="words-per-round" id="wordsPerRoundContainer"></div></div>
+            <div class="card"><h3>⏱️ Timer</h3><div class="timer-settings"><button class="btn timer-btn" onclick="adjustTimer(-15)">−</button><div class="timer-value" id="timerValue">60s</div><button class="btn timer-btn" onclick="adjustTimer(15)">+</button></div></div>
+            <button class="btn btn-primary" onclick="startGame()">🚀 Lancer !</button>
+        </div>
+        <div class="screen" id="playingScreen">
+            <div class="game-header"><span class="round-badge" id="roundBadge">Round 1</span><span class="mode-badge" id="modeBadge">Général</span><span class="progress-badge" id="progressBadge">Mot 1/5</span></div>
+            <div class="timer-display"><div class="timer-circle" id="timerCircle">60</div><div class="timer-controls"><button class="btn" id="playPauseBtn" onclick="toggleTimer()">⏸️</button><button class="btn" onclick="resetTimer()">🔄</button></div></div>
+            <div class="word-card"><div class="loading" id="wordLoading"><div class="spinner"></div><p>Chargement...</p></div><div id="wordContent" style="display:none"><div class="current-word" id="currentWord">MOT</div><div class="forbidden-label" id="forbiddenLabel" style="display:none">🚫 Mots interdits :</div><div class="hints-container" id="hintsContainer"></div></div></div>
+            <div class="card"><h3>🏆 Qui a trouvé ?</h3><div class="players-grid" id="playersGrid"></div></div>
+            <div class="action-buttons"><button class="btn btn-skip" onclick="skipWord()">⏭️ Passer</button><button class="btn btn-next" onclick="nextWord()">✅ Suivant</button><button class="btn btn-scores" onclick="showScores()">📊 Scores</button></div>
+        </div>
+        <div class="screen" id="scoresScreen">
+            <div class="scores-header"><div class="logo">🏆</div><h2>Scores</h2></div>
+            <div class="podium" id="podium"></div>
+            <div class="stats-card"><h3 style="margin-bottom:15px;text-align:center">📈 Stats</h3><div class="stats-grid"><div class="stat-item"><div class="value" id="statRound">1</div><div class="label">Rounds</div></div><div class="stat-item"><div class="value" id="statWords">0</div><div class="label">Trouvés</div></div></div></div>
+            <div class="scores-actions"><button class="btn btn-continue" onclick="continueGame()">▶️ Continuer (Round <span id="nextRound">2</span>)</button><button class="btn btn-new-game" onclick="newGame()">🔄 Nouvelle partie</button></div>
+        </div>
+    </div>
+    <script>
+        const SUPABASE_URL='https://bnbnqokqgxqvnygrrmiz.supabase.co';
+        const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuYm5xb2txZ3hxdm55Z3JybWl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MDgxOTAsImV4cCI6MjA4MjA4NDE5MH0.LelvBYyknytlw-UZjebX0v_yzqmrTCpfbgPoxJMfDcI';
+        const MODES=[{id:'enfants_animaux',name:'Animaux Enfants',emoji:'🐾'},{id:'enfants_objets',name:'Objets Enfants',emoji:'🧸'},{id:'enfants_corps',name:'Corps Humain',emoji:'🦶'},{id:'general',name:'Général',emoji:'🎯'},{id:'animaux',name:'Animaux',emoji:'🦁'},{id:'nourriture',name:'Nourriture',emoji:'🍕'},{id:'films',name:'Films',emoji:'🎬'},{id:'sports',name:'Sports',emoji:'⚽'},{id:'sciences',name:'Sciences',emoji:'🔬'},{id:'mangas',name:'Mangas',emoji:'🎌'},{id:'geographie',name:'Géographie',emoji:'🌍'},{id:'metiers',name:'Métiers',emoji:'👨‍⚕️'},{id:'musique',name:'Musique',emoji:'🎵'},{id:'jeux_video',name:'Jeux Vidéo',emoji:'🎮'},{id:'nature',name:'Nature',emoji:'🌿'},{id:'celebrites',name:'Célébrités',emoji:'⭐'},{id:'marques',name:'Marques',emoji:'🏷️'},{id:'adulte_culture',name:'Culture Expert',emoji:'📚'},{id:'adulte_science',name:'Science Expert',emoji:'🧪'},{id:'adulte_histoire',name:'Histoire Expert',emoji:'🏛️'},{id:'adulte_litterature',name:'Littérature',emoji:'📖'},{id:'adulte_medical',name:'Médical Expert',emoji:'🩺'},{id:'mots_interdits',name:'Mode Taboo',emoji:'🚫'}];
+        let G={players:[''],gameMode:'general',wordsPerRound:5,currentWordIndex:0,currentWord:null,scores:{},timer:60,timeLeft:60,isTimerActive:false,isInfiniteTimer:false,round:1,usedWords:[],totalWordsGuessed:0,timerInterval:null,wordsCache:[]};
+        document.addEventListener('DOMContentLoaded',()=>{initModeGrid();initWordsPerRound();addPlayer();addPlayer();checkOnline()});
+        function checkOnline(){const b=document.getElementById('offlineBanner');const u=()=>b.classList.toggle('show',!navigator.onLine);window.addEventListener('online',u);window.addEventListener('offline',u);u()}
+        function initModeGrid(){document.getElementById('modeGrid').innerHTML=MODES.map(m=>`<div class="mode-item btn ${m.id===G.gameMode?'selected':''}" onclick="selectMode('${m.id}')"><span class="emoji">${m.emoji}</span>${m.name}</div>`).join('')}
+        function initWordsPerRound(){const c=document.getElementById('wordsPerRoundContainer');[3,4,5].forEach(n=>{const b=document.createElement('button');b.className=`btn ${n===G.wordsPerRound?'selected':''}`;b.textContent=`${n} mots`;b.onclick=()=>selectWordsPerRound(n);c.appendChild(b)})}
+        function selectWordsPerRound(n){G.wordsPerRound=n;document.querySelectorAll('#wordsPerRoundContainer .btn').forEach(b=>b.classList.toggle('selected',b.textContent===`${n} mots`))}
+        function addPlayer(){if(G.players.length>=8)return;G.players.push('');renderPlayers()}
+        function removePlayer(i){if(G.players.length<=2)return;G.players.splice(i,1);renderPlayers()}
+        function updatePlayerName(i,n){G.players[i]=n}
+        function renderPlayers(){document.getElementById('playersContainer').innerHTML=G.players.map((n,i)=>`<div class="input-group"><input type="text" placeholder="Joueur ${i+1}" value="${n}" onchange="updatePlayerName(${i},this.value)">${G.players.length>2?`<button class="btn btn-remove" onclick="removePlayer(${i})">✕</button>`:''}</div>`).join('')}
+        function selectMode(id){G.gameMode=id;document.querySelectorAll('.mode-item').forEach(i=>i.classList.remove('selected'));event.target.closest('.mode-item').classList.add('selected')}
+        function adjustTimer(d){if(G.isInfiniteTimer&&d>0){G.isInfiniteTimer=false;G.timer=15}else if(G.timer+d<15){G.isInfiniteTimer=true}else{G.timer=Math.min(300,G.timer+d)}updateTimerDisplay()}
+        function updateTimerDisplay(){document.getElementById('timerValue').textContent=G.isInfiniteTimer?'∞':`${G.timer}s`}
+        async function fetchWords(cat,lim=50){try{const r=await fetch(`${SUPABASE_URL}/rest/v1/words?category=eq.${cat}&select=*&limit=${lim}`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});if(!r.ok)throw new Error();return(await r.json()).map(i=>({word:i.word,hints:i.hints,forbidden:i.forbidden||null}))}catch(e){console.error(e);return[]}}
+        async function startGame(){const vp=G.players.filter(p=>p.trim());if(vp.length<2){alert('2 joueurs minimum!');return}G.players=vp;G.scores={};vp.forEach(p=>G.scores[p]=0);G.round=1;G.totalWordsGuessed=0;G.usedWords=[];G.currentWordIndex=0;G.timeLeft=G.timer;showScreen('playing');await loadWords();await getNewWord();renderPlayersGrid()}
+        async function loadWords(){document.getElementById('wordLoading').style.display='flex';document.getElementById('wordContent').style.display='none';G.wordsCache=await fetchWords(G.gameMode,100);G.wordsCache.sort(()=>Math.random()-.5)}
+        async function getNewWord(){document.getElementById('wordLoading').style.display='flex';document.getElementById('wordContent').style.display='none';const av=G.wordsCache.filter(w=>!G.usedWords.includes(w.word));if(!av.length){await loadWords();return getNewWord()}const w=av[Math.floor(Math.random()*av.length)];G.currentWord=w;G.usedWords.push(w.word);displayWord(w);updateProgress();resetTimer()}
+        function displayWord(w){document.getElementById('wordLoading').style.display='none';document.getElementById('wordContent').style.display='block';document.getElementById('currentWord').textContent=w.word;const h=document.getElementById('hintsContainer'),f=document.getElementById('forbiddenLabel');if(w.forbidden&&w.forbidden.length){f.style.display='block';h.innerHTML=w.forbidden.map(x=>`<span class="forbidden-badge">${x}</span>`).join('')}else{f.style.display='none';h.innerHTML=w.hints.map(x=>`<span class="hint-badge">${x}</span>`).join('')}}
+        function updateProgress(){document.getElementById('progressBadge').textContent=`Mot ${G.currentWordIndex+1}/${G.wordsPerRound}`;document.getElementById('roundBadge').textContent=`Round ${G.round}`;const m=MODES.find(x=>x.id===G.gameMode);document.getElementById('modeBadge').textContent=m?`${m.emoji} ${m.name}`:''}
+        function renderPlayersGrid(){document.getElementById('playersGrid').innerHTML=G.players.map(p=>`<button class="btn player-btn" onclick="scorePoint('${p}')">${p}<span class="score">${G.scores[p]} pts</span></button>`).join('')}
+        function scorePoint(p){G.scores[p]++;G.totalWordsGuessed++;renderPlayersGrid();nextWord()}
+        async function nextWord(){stopTimer();G.currentWordIndex++;if(G.currentWordIndex>=G.wordsPerRound){showScores()}else{await getNewWord()}}
+        function skipWord(){nextWord()}
+        function startTimer(){if(G.isInfiniteTimer)return;G.isTimerActive=true;document.getElementById('playPauseBtn').textContent='⏸️';G.timerInterval=setInterval(()=>{G.timeLeft--;updateTimerCircle();if(G.timeLeft<=0){stopTimer();nextWord()}},1000)}
+        function stopTimer(){G.isTimerActive=false;clearInterval(G.timerInterval);document.getElementById('playPauseBtn').textContent='▶️'}
+        function toggleTimer(){if(G.isInfiniteTimer)return;G.isTimerActive?stopTimer():startTimer()}
+        function resetTimer(){stopTimer();G.timeLeft=G.timer;updateTimerCircle();startTimer()}
+        function updateTimerCircle(){const c=document.getElementById('timerCircle');if(G.isInfiniteTimer){c.textContent='∞';c.classList.add('infinite');c.classList.remove('critical')}else{c.textContent=G.timeLeft;c.classList.remove('infinite');c.classList.toggle('critical',G.timeLeft<=10)}}
+        function showScores(){stopTimer();showScreen('scores');renderScores()}
+        function renderScores(){const sp=Object.entries(G.scores).sort((a,b)=>b[1]-a[1]);const medals=['🥇','🥈','🥉'];document.getElementById('podium').innerHTML=sp.map(([n,s],i)=>`<div class="podium-item ${i===0?'first':''}"><div class="podium-rank">${medals[i]||(i+1)}</div><div class="podium-info"><div class="podium-name">${n}${i===0?'<span class="crown">👑</span>':''}</div></div><div class="podium-score">${s}</div></div>`).join('');document.getElementById('statRound').textContent=G.round;document.getElementById('statWords').textContent=G.totalWordsGuessed;document.getElementById('nextRound').textContent=G.round+1}
+        async function continueGame(){G.round++;G.currentWordIndex=0;showScreen('playing');await getNewWord();renderPlayersGrid()}
+        function newGame(){G={...G,scores:{},round:1,totalWordsGuessed:0,usedWords:[],currentWordIndex:0,wordsCache:[]};showScreen('setup');renderPlayers()}
+        function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(n+'Screen').classList.add('active');document.body.className=n+'-screen'}
+    </script>
+</body>
+</html>
